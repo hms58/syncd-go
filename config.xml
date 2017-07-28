@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<configuration version="1">
+	<!-- ============================= rsync ============================= -->
+	<rsync path="D:\usr\cwRsync\rsync.exe" >
+		<opt>-vvzrtopgu</opt>
+		<opt>\-\-chmod=ugo=rwX</opt>
+		<opt>-\-whole-file</opt>
+		<!-- <opt s='-u'>\-\-update</opt>
+		<opt s='-t'>\-\-times</opt>
+		<opt s='-p'>\-\-perms</opt>
+		<opt s='-o'>\-\-owner</opt>
+		<opt s='-g'>\-\-group</opt>
+		<opt s='-z'>-\-compress</opt>
+		<opt s='-r'>-\-recursive</opt>
+		<opt s='-W'>-\-whole-file</opt>
+		<opt>-\-delete</opt>
+		<opt>-\-ignore-errors</opt>
+		<opt s='-0'>-\-from0</opt>
+		<opt>-n</opt> -->
+	</rsync>
+	<!-- ============================= 监控 ============================= -->
+	<folder id="toDst" label="Dropbox" delete="running" >
+		<source>D:\test\src</source>
+		<target>D:\test\dst</target>
+		<filter>!**.sh</filter>
+		<filter>**</filter>
+		<!-- <opt>-\-delete</opt> -->
+	</folder>
+	<folder id="toSrc" label="Dropbox" delete="running" >
+		<source>D:\test\dst</source>
+		<target>D:\test\src</target>
+	</folder>
+	<filter>
+		<item>**.o</item>
+		<item>**.log</item>
+	</filter>
+</configuration>
