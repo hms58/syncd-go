@@ -229,14 +229,22 @@ func main() {
 
 	folders := filterFolders(allFolders)
 
-	for _, folder := range folders {
+	for k, folder := range folders {
 		Debug.Println("Installing watch for " + folder.Label)
 
-		go watchFolder(folder)
+		// go watchFolder(folder)
+		go watchFolder(&folders[k])
 	}
 
 	code := <-stop
-	OK.Println("Exiting")
+
+	for _, folder := range folders {
+
+		filterFile := filepath.Join(folder.SrcRealPath, ".syignore")
+		Debug.Println("Remove .syignore: ", filterFile)
+		os.Remove(filterFile)
+	}
+	OK.Println("Exiting: ", code)
 	os.Exit(code)
 }
 
@@ -263,6 +271,7 @@ func restart() bool {
 	}
 	proc.Release()
 	stop <- 3
+	// OK.Println("Restart successfully.")
 	return true
 }
 
@@ -375,7 +384,7 @@ func getFolders(path string) ([]FolderConfiguration, Configuration, error) {
 
 // watchFolder installs inotify watcher for a folder, launches
 // goroutine which receives changed items. It never exits.
-func watchFolder(folder FolderConfiguration) {
+func watchFolder(folder *FolderConfiguration) {
 
 	CreateDirectory(folder.Source)
 	CreateDirectory(folder.Target)
@@ -400,7 +409,7 @@ func watchFolder(folder FolderConfiguration) {
 	folder.SrcCygdrivePath = TransformCygDrivePath(folder.SrcRealPath)
 	folder.DstCygdrivePath = TransformCygDrivePath(folder.DstRealPath)
 
-	gCfg.Rsync.SyncDir(folder)
+	gCfg.Rsync.SyncDir(*folder)
 
 	Trace.Println("Getting ignore patterns for " + folder.Label)
 	ignoreFilter := createIgnoreFilter(folderPath, folder.Filter)
@@ -428,7 +437,7 @@ func watchFolder(folder FolderConfiguration) {
 	}
 	defer notify.Stop(c)
 
-	go accumulateChanges(debounceTimeout, folderPath, folderPath, folder, dirVsFiles, fsInput, informChange)
+	go accumulateChanges(debounceTimeout, folderPath, folderPath, *folder, dirVsFiles, fsInput, informChange)
 	OK.Println("Watching " + folder.Label + ": " + folderPath)
 	if folder.RescanIntervalS < 1800 && delayScan <= 0 {
 		OK.Printf("The rescan interval of folder %s can be increased to 3600 (an hour) or even 86400 (a day) as changes should be observed immediately while syncthing-inotify is running.", folder.Label)
@@ -522,7 +531,14 @@ func accumulateChanges(debounceTimeout time.Duration,
 					Warning.Printf("sync failed %s, file: %s", strerr, srcFilePath)
 				}
 			}
-
+			if srcFilePath == configFile {
+				// status := restart()
+				if restart() {
+					OK.Println("Restart successfully.")
+				} else {
+					OK.Println("Restart failed.")
+				}
+			}
 			// if IsConfigFile(item) {
 			// 	Monitor.Printf("%v %v", item2.Action, srcFilePath)
 			// }
@@ -687,6 +703,7 @@ func createIgnoreFilter(folderPath string, filters []string) func(relPath string
 	// 		totalfilters = append(totalfilters, v)
 	// 	}
 		// ignore.WriteIgnores(filterFile, totalfilters)
+		os.Remove(filterFile)
 		ignore.WriteIgnores(filterFile, filters)
 	}
 	ignores := ignore.New(false)  // ignores := ignore.New(false)

@@ -1,0 +1,20 @@
+language: go
+
+go:
+  - 1.8.4
+
+notifications:      # 每次构建的时候是否通知，如果不想收到通知邮箱（个人感觉邮件贼烦），那就设置false吧
+  email: true
+
+env:
+  - GOOS=windows
+  - GOARCH=amd64
+
+install:
+  - sudo apt-get install make -y
+
+script:
+  - GOROOT=/usr/local/go make
+
+after_script:
+  - rm -rf ./bin/*
