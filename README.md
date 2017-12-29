@@ -1,4 +1,4 @@
-# syncd-go
+# syncd-go [![Build Status](https://travis-ci.org/hms58/syncd-go.svg?branch=master)](https://travis-ci.org/hms58/syncd-go)
 
 ## windows下文件夹同步工具。
 ```

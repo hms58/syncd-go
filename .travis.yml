@@ -7,14 +7,14 @@ notifications:      # 每次构建的时候是否通知，如果不想收到通�
   email: true
 
 env:
-  - GOOS=windows
-  - GOARCH=amd64
+  - GOOS=windows GOARCH=amd64    # 相同环境变量放在一起
 
 install:
   - sudo apt-get install make -y
 
 script:
-  - GOROOT=/usr/local/go make
+  - make
 
 after_script:
+  - test -f bin/syncd-go.exe
   - rm -rf ./bin/*
