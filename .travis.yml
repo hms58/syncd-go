@@ -17,21 +17,25 @@ install:
 gobuild_args: -ldflags "-extldflags -static"
 
 script:
-  - go build -v ./...
+  # - go build -v ./...
+  - make
 
 after_script:
   - test -f bin/syncd-go.exe
-  - rm -rfv ./bin/*
+  - echo $?
+  # - rm -rfv ./bin/*
 
 before_deploy:       # 部署之前
   # 使用 mv 命令进行修改apk文件的名字
-  - mv syncd-go.exe syncd-go.exe
+  # - mv bin/syncd-go.exe bin/syncd-go.exe
+  - test -f bin/syncd-go.exe
+  - echo $?
 
 deploy:              # 部署
   provider: releases # 部署到GitHub Release，除此之外，Travis CI还支持发布到fir.im、AWS、Google App Engine等
   api_key:           # 填写GitHub的token （Settings -> Personal access tokens -> Generate new token）
     secure: 521228dd0e56b29229a0b843cff7d9bb78f9b3ab
-  file: syncd-go.exe   # 部署文件路径
+  file: bin/syncd-go.exe   # 部署文件路径
   skip_cleanup: true     # 设置为true以跳过清理,不然apk文件就会被清理
   on:     # 发布时机
     tags: true       # tags设置为true表示只有在有tag的情况下才部署
